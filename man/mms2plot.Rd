@@ -76,13 +76,6 @@ annotation? The default is FALSE.}
 \description{
 Visualization of multiple MS/MSs for (un)modified peptides
 }
-\examples{
-id_table_path = system.file(package = "MMS2plot",dir = "ext/msms_test.txt")
-         par_xml_path = system.file(package = "MMS2plot",dir = "ext/modifications.xml")
-         mqpar_filepath = system.file(package = "MMS2plot",dir = "ext/mqpar_list.txt")
-         mms2plot(id_table_path, par_xml_path, mqpar_filepath,pdf_width=7)
-
-}
 \author{
 Lei Li
 }

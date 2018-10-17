@@ -41,14 +41,7 @@
 #' @param show_letterBY Logical: should "b"/"y" characters are shown on the peak
 #'        annotation? The default is FALSE.
 #'
-#' @examples id_table_path = system.file(package = "MMS2plot",dir = "ext/msms_test.txt")
-#'          par_xml_path = system.file(package = "MMS2plot",dir = "ext/modifications.xml")
-#'          mqpar_filepath = system.file(package = "MMS2plot",dir = "ext/mqpar_list.txt")
-#'          mms2plot(id_table_path, par_xml_path, mqpar_filepath,pdf_width=7)
-#'
 #' @return NULL
-#' @import stringr
-#' @import TeachingDemos
 #' @import xml2
 #' @importFrom MSnbase readMSData
 #' @importFrom grDevices dev.off pdf
@@ -102,14 +95,14 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
   srt = 0
   # read a batch of mqpar.xml files and extract modifications and label information stored in mqpar
   mqpar_files=readLines(mqpar_filepath, warn=FALSE)
-  mqpar = rbindlist(lapply(mqpar_files, readMQPar))
+  mqpar = data.table::rbindlist(lapply(mqpar_files, readMQPar))
 
   input_table <- data.table::fread(id_table_path, na.strings = "NA", sep = "\t",
                                    check.names = FALSE, fill = TRUE, header = TRUE, stringsAsFactors = FALSE)
 
   input_table$base_rawFile = basename(input_table$`Raw file`)
   #browser()
-  input_table = check_input_table(input_table, mqpar)
+  input_table = check_input_table(input_table, id_table_path, mqpar)
 
   lapply(unique(input_table$`Raw file`), drawms2plot_samerawfile, input_table, par_xml_path, mqpar, min_intensity_ratio, pdf_width, pdf_height,
           xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height, mod_height, len_annoSpace, lwd, cex, show_letterBY, srt) # call for individual raw_files

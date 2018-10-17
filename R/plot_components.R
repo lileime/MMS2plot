@@ -10,16 +10,16 @@ label_axis<-function(max_intensity, xlab, ylab, max_mz, cex,lwd){
     }
     axis_y = signif(c(axis_y_negative, axis_y_positive[-1]), digits=4) # remove duplicate "0" and keep 4 digits
     axis_y_percent = scales::percent(abs(seq(-1, 1, length.out = 9))) # abs( separate -1 to 1 with the length of 9 )
-    
+
     axis(side = 2,las = 1, at = seq(-1,1, length.out = 9), labels = as.integer(axis_y), tck=-0.01, mgp=c(0, 0.2, 0), cex.axis=0.33, lwd=0.5*lwd)# format(axis_y_positive,scientific=F))
     axis(side = 4,las = 1, at = seq(-1,1, length.out = 9), labels = axis_y_percent,     tck=-0.01, mgp=c(0, 0.2, 0), cex.axis=0.33, lwd=0.5*lwd)
-    
+
     axis(side = 1, at=seq(0, max_mz, by=200), lwd=0.5*lwd, tck=-0.01, labels=FALSE) # mgp=c(0,0.1,0) setting NOT work for dist. betw. label and x-axis. Thus mtext used.
-    mtext(side = 1, text=seq(0, max_mz, by=200), at=seq(0, max_mz, by=200), cex=0.33*cex) #
+    graphics::mtext(side = 1, text=seq(0, max_mz, by=200), at=seq(0, max_mz, by=200), cex=0.33*cex) #
   }else{ # for group_plot
     axis_y = seq(0, max_intensity, length.out = 5) # quarter of the max_intensity
     axis_y_percent = scales::percent(seq(0, 1, length.out = 5)) # abs( separate 0 to 1 with the length of 5 )
-    
+
     axis(side = 2,las = 1, at = seq(0, 1, length.out = 5), labels = as.integer(axis_y), tck=-0.02, mgp=c(0, 0.2, 0), cex.axis=0.33, lwd=0.5*lwd)# format(axis_y_positive,scientific=F))
     axis(side = 4,las = 1, at = seq(0, 1, length.out = 5), labels = axis_y_percent,     tck=-0.02, mgp=c(0, 0.2, 0), cex.axis=0.33, lwd=0.5*lwd)
   }
@@ -46,14 +46,14 @@ draw_peak_ionL<-function(psm, lwd, len_annoSpace, srt,show_letterBY){
 
 # generate and draw PSM labels
 draw_psmanno<-function(AA_mz, PSM, max_mz, peptide_height, mod_height, len_annoSpace, y_ion_col, b_ion_col, lwd){
-  #browser()
-  AA_mz = subset(AA_mz, charge == 1) # for peptide annotation, only consider aa with charge 1 for printing
+  if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+  AA_mz = subset(AA_mz, AA_mz$charge == 1) # for peptide annotation, only consider aa with charge 1 for printing
   direction = PSM$direction[1] # draw MS2 on upplot (1) or downplot (-1)
   peptide = c("-", as.character(AA_mz$aa_varmod), "-")
   peptide_list = vector("list", length(peptide)*2-1) # set peptide + two dash
   peptide_list_b = peptide_list # set b ions
   peptide_list_y = peptide_list # set y ions
-  
+
   # set peptide
   peptide_list[c(TRUE,FALSE)] <- as.list(peptide)
   peptide_list[c(FALSE,TRUE)] <- as.list(".")
@@ -61,50 +61,50 @@ draw_psmanno<-function(AA_mz, PSM, max_mz, peptide_height, mod_height, len_annoS
   peptide_list_b[c(FALSE,TRUE)] <- paste("b", seq(0,length(peptide)-2,by=1),      sep="")
   # set y ions
   peptide_list_y[c(FALSE,TRUE)] <- paste("y", rev(seq(0,length(peptide)-2,by=1)), sep="")
-  
+
   # set the width of AA sequence in the plot
   x_quarter=seq(0,max_mz, length.out = 20)[c(3,18)]  # seq printed from 5/20 to 17/20  #mz
   AA_pos = seq(x_quarter[1], x_quarter[2], length.out=length(peptide_list))
   pos_start_dash = x_quarter[1]  # x-axis value for "-" at the front of peptides
   pos_end_dash   = x_quarter[2] # x-axis value for "-" at the end of peptides
-  
+
   # integrate as data.table
-  PSMlabel=data.table(AA_pos = AA_pos, peptide=peptide_list, bion = peptide_list_b, yion =  peptide_list_y)
+  PSMlabel=data.table::data.table(AA_pos = AA_pos, peptide=peptide_list, bion = peptide_list_b, yion =  peptide_list_y)
   #browser()
-  
+
   apply(PSMlabel, 1, print_modpeptide,  peptide_height, mod_height, pos_start_dash, pos_end_dash, direction)  # print AA letters for labelling
-  
+
   # draw b/y ions between AA letters
-  PSManno_bion = subset(PSMlabel, bion %in% PSM$ion)$AA_pos
+  PSManno_bion = subset(PSMlabel, PSMlabel$bion %in% PSM$ion)$AA_pos
   index = match(PSManno_bion,PSMlabel$AA_pos)-1
   bion_xsmall = (PSMlabel$AA_pos[index] + PSManno_bion)/2
-  PSManno_yion = subset(PSMlabel, yion %in% PSM$ion)$AA_pos
+  PSManno_yion = subset(PSMlabel, PSMlabel$yion %in% PSM$ion)$AA_pos
   index = match(PSManno_yion,PSMlabel$AA_pos)+1
   yion_xlarge = (PSMlabel$AA_pos[index] + PSManno_yion)/2
-  
-  PSManno_bsmall = substring(subset(PSMlabel, bion %in% PSM$ion)$bion,2) #text
-  PSManno_ysmall = substring(subset(PSMlabel, yion %in% PSM$ion)$yion,2) #text
-  
+
+  PSManno_bsmall = substring(subset(PSMlabel, PSMlabel$bion %in% PSM$ion)$bion,2) #text
+  PSManno_ysmall = substring(subset(PSMlabel, PSMlabel$yion %in% PSM$ion)$yion,2) #text
+
   if(direction ==1){
     segments(PSManno_bion, rep(peptide_height, length(PSManno_bion)), PSManno_bion, rep(peptide_height-len_annoSpace, length(PSManno_bion)), col=b_ion_col, lwd=lwd)
     segments(bion_xsmall, rep(peptide_height-len_annoSpace, length(PSManno_bion)), PSManno_bion, rep(peptide_height-len_annoSpace, length(PSManno_bion)), col=b_ion_col, lwd=lwd)
-    
+
     text((bion_xsmall+PSManno_bion)/2, rep(peptide_height-len_annoSpace, length(PSManno_bion)), PSManno_bsmall, cex = 0.25, adj=c(0.5, 1.3),col=b_ion_col) #
-    
+
     segments(PSManno_yion, rep(peptide_height, length(PSManno_yion)), PSManno_yion, rep(peptide_height+len_annoSpace, length(PSManno_yion)), col=y_ion_col, lwd=lwd)
     segments(yion_xlarge,rep(peptide_height+len_annoSpace, length(PSManno_yion)), PSManno_yion, rep(peptide_height+len_annoSpace, length(PSManno_yion)), col=y_ion_col, lwd=lwd)
-    
+
     text((yion_xlarge+PSManno_yion)/2, rep(peptide_height+len_annoSpace, length(PSManno_yion)), PSManno_ysmall, cex = 0.25, adj=c(0.5, -0.3),col=y_ion_col)
-    
+
   }else{
     segments(PSManno_bion, rep(peptide_height*-1, length(PSManno_bion)), PSManno_bion, rep((peptide_height+len_annoSpace)*-1, length(PSManno_bion)), col=b_ion_col, lwd=lwd)
     segments(bion_xsmall, rep((peptide_height+len_annoSpace)*-1, length(PSManno_bion)), PSManno_bion, rep((peptide_height+len_annoSpace)*-1, length(PSManno_bion)), col=b_ion_col, lwd=lwd)
-    
+
     text((bion_xsmall+PSManno_bion)/2, rep((peptide_height+len_annoSpace)*-1, length(PSManno_bion)), PSManno_bsmall, cex = 0.25, adj=c(0.5, 1.3),col=b_ion_col) #
-    
+
     segments(PSManno_yion, rep(peptide_height*-1, length(PSManno_yion)), PSManno_yion, rep((peptide_height-len_annoSpace)*-1, length(PSManno_yion)), col=y_ion_col, lwd=lwd)
     segments(yion_xlarge, rep((peptide_height-len_annoSpace)*-1, length(PSManno_yion)), PSManno_yion, rep((peptide_height-len_annoSpace)*-1, length(PSManno_yion)), col=y_ion_col, lwd=lwd)
-    
+
     text((yion_xlarge+PSManno_yion)/2, rep((peptide_height-len_annoSpace)*-1, length(PSManno_yion)), PSManno_ysmall, cex = 0.25, adj=c(0.5, -0.3),col=y_ion_col)
   }
 }
@@ -176,13 +176,13 @@ draw_ms2generalinfo<-function(rt, scan, mz, charge, gene, PSM, info_height){
 
 #  plot_group_individual
 plot_group_individual<-function(mz_intensity_percent, AA_mz,  PSM, max_intensity, base_rawFile, rt, scan, mz, charge, gene,
-                                y_ion_col, b_ion_col, peaks_col, lwd,  peptide_height, mod_height, len_annoSpace, srt, cex, max_mz, info_height, show_letterBY){
+                                y_ion_col, b_ion_col, peaks_col, ymax, lwd, peptide_height, mod_height, len_annoSpace, srt, cex, max_mz, info_height, show_letterBY){
   #browser()
   graphics::plot(mz_intensity_percent$mz, mz_intensity_percent$intensity_perc, type = "h",las = 1,
        xlab = "", ylab = "", xlim = c(0, max_mz), xaxt="n", yaxt="n", xaxs="i", yaxs="i",  # without using axes=FALSE because we want exact x/ylim
        ylim = c(0, ymax), col = peaks_col, cex = cex, lwd=0.5, frame.plot=FALSE) # max_intensity is 1. give the space of 0.7 for annotation
-  box(lwd=lwd/2)
-  
+  graphics::box(lwd=lwd/2)
+
   label_axis(max_intensity, xlab="", ylab="", max_mz, cex, lwd)
   draw_peak_ionL(PSM, lwd, len_annoSpace, srt, show_letterBY) # draw and color peak extension line
   ## draw PSM annotation (peptide, mod, b ions and y ions)

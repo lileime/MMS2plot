@@ -50,7 +50,7 @@ readMQPar <- function(mqpar_filename) {
       fixedModifications = paste(fixedModifications, collapse = ",")
     }
 
-    output = data.table(rawfile, variableModifications, isobaricLabels, labelMods, fixedModifications)
+    output = data.table::data.table(rawfile, variableModifications, isobaricLabels, labelMods, fixedModifications)
     return(output)
   } else{
     stop("No raw file is included in this mqpar.xml!")
@@ -61,9 +61,9 @@ readMQPar <- function(mqpar_filename) {
 
 
 # check if the input_table has the expected format
-check_input_table<-function(input_table, mqpar){
-  # check input_table
-  if(nrow(input_table) == 0){ stop(paste("The file", identification_table_path, "is empty! Please see the example file. [note:stopped in the function check_input_table].")) }
+check_input_table<-function(input_table, id_table_path, mqpar){
+  if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+  if(nrow(input_table) == 0){ stop(paste("The file", id_table_path, "is empty! Please see the example file. [note:stopped in the function check_input_table].")) }
   #print(mqpar)
   #browser()
   unique_rawfiles = tools::file_path_sans_ext(basename(input_table$`Raw file`))
@@ -77,19 +77,19 @@ check_input_table<-function(input_table, mqpar){
   if(length(col_not_exist) > 0 ){ stop(paste("The column(s) '", paste(col_not_exist,collapse = " and ") , "' is(are) not existent! [note:stopped in the function check_input_table].", sep = "" )) }
 
   # check if each label group only contains a single raw file names
-  unique_rawFile = input_table[, unique(`Raw file`), by = label]
+  unique_rawFile = input_table[, unique(input_table$`Raw file`), by = input_table$label]
   if(nrow(unique_rawFile) != length(unique(unique_rawFile$label))) {stop("MS2 IDs in each group should be derived from the same MS file! [note:stopped in the function check_input_table].")}
 
   # check if each label group only contains a single peptide sequences
-  unique_sequence = input_table[, unique(Sequence), by = label]
+  unique_sequence = input_table[, unique(input_table$Sequence), by = input_table$label]
   if(nrow(unique_sequence) != length(unique(unique_rawFile$label)) ){stop("Each group should contain the same peptide sequences with different modifications! [note:stopped in the function check_input_table].")}
 
   ##############################################################################################
 
   input_table$`Modified sequence` = gsub("_","", input_table$`Modified sequence`)
-  input_table_unmod = subset(input_table, nchar(`Modified sequence`) == 0)
+  input_table_unmod = subset(input_table, nchar(input_table$`Modified sequence`) == 0)
   input_table_unmod$`Modified sequence` = input_table_unmod$Sequence
-  input_table_mod = subset(input_table, nchar(`Modified sequence`)>0)
+  input_table_mod = subset(input_table, nchar(input_table$`Modified sequence`)>0)
   mod_remove_brackets = gsub("\\(\\w\\w\\)", "", input_table_mod$`Modified sequence`) # remove modificaiton to check sequence identity
   if( !all(input_table_mod$Sequence == mod_remove_brackets) ){stop("The sequences in the 'Sequence' column are different from those in the 'Modified sequence' column ! [note:stopped in the function check_input_table].")}
 
@@ -121,7 +121,7 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, mqp
   rm(MS2s_frFile);  invisible(gc())
   #browser()
   mzIntensity = do.call(rbind, mzIntensity_list) # change list as data.frame, each row contain one MS2 info
-  input_table_sameRawFile = setDT(mzIntensity)[input_table_sameRawFile, on="Scan number"] # merge input_table and mzIntensity
+  input_table_sameRawFile = data.table::setDT(mzIntensity)[input_table_sameRawFile, on="Scan number"] # merge input_table and mzIntensity
   #############################################################################################
 
   tmp=by(input_table_sameRawFile, input_table_sameRawFile$label, plot_mms2, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
@@ -133,13 +133,13 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, mqp
 # Get MS2 m/z and intensities
 get_ms2info <- function(scan_number, ms2_samefile){
   #browser()
-  MS1table = fData(ms2_samefile)
-  MS1_specific = subset(MS1table, acquisitionNum == scan_number)$filterString
+  MS1table = Biobase::fData(ms2_samefile)
+  MS1_specific = subset(MS1table, MS1table$acquisitionNum == scan_number)$filterString
   if( length(MS1_specific) ==0){ stop( paste("The scan_number [", scan_number, "] is not found in the raw MS file! [note:stopped in the function get_ms2info].", sep="") ) }
-  MS1_mz = as.numeric(tail(unlist(strsplit(unlist(strsplit(MS1_specific, "@"))[1] , " ")),n=1)) # mzML: get ms1 mz; NA for mzXML
+  MS1_mz = as.numeric(utils::tail(unlist(strsplit(unlist(strsplit(MS1_specific, "@"))[1] , " ")),n=1)) # mzML: get ms1 mz; NA for mzXML
 
-  ms2_info = ms2_samefile[[which(fData(ms2_samefile)$acquisitionNum == scan_number)]]  # fData(ms2_samefile) shows all the MS2 info
-  ms2_info_table = data.table("Scan number"=scan_number, max_intensity = max( ms2_info@intensity ),
+  ms2_info = ms2_samefile[[which(Biobase::fData(ms2_samefile)$acquisitionNum == scan_number)]]  # fData(ms2_samefile) shows all the MS2 info
+  ms2_info_table = data.table::data.table("Scan number"=scan_number, max_intensity = max( ms2_info@intensity ),
                               `Retention time`=ms2_info@rt, `m/z` = ifelse(is.na(MS1_mz), ms2_info@precursorMz, MS1_mz), #mzXML may not have ms1 mz from the string
                               Charge = ms2_info@precursorCharge, Monoisotopicmz = ms2_info@precursorMz,
                               mz=paste(round( ms2_info@mz, digits = 3), collapse=";" ),
@@ -150,7 +150,8 @@ get_ms2info <- function(scan_number, ms2_samefile){
 
 # plot_mms2 function
 plot_mms2 <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
-                      ppm, y_ion_col, b_ion_col, peaks_col,  xmai, ymai, lwd, peptide_height, mod_height, len_annoSpace, srt, cex, info_height, show_letterBY){
+                      xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
+                      mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   if(nrow(input_table) == 2){
     plot_mirror(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                 xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
@@ -177,7 +178,7 @@ plot_mirror <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_w
   PSMs = mapply(find_matchedIons, AA_mzs, mz_intensity_percent, MoreArgs=list(b_ion_col, y_ion_col), SIMPLIFY = F )  # calcualte PSM for each MS2 plot iteratively
   two_PSMs = do.call(rbind, PSMs)
   #browser()
-  graphics.off()
+  grDevices::graphics.off()
   pdf(file=paste(outputFilename, "pdf", sep="."), width=pdf_width, height=pdf_height*2)
 
   old_options <- options(scipen=22) # max of fixed (not exponential) notation: 1e22
@@ -197,7 +198,7 @@ plot_mirror <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_w
   graphics::plot(two_mz_intensity_percent$mz, two_mz_intensity_percent$intensity_perc, type = "h",las = 1,
        xlab = "", ylab = "", xlim = c(0, max_mz), xaxt="n", yaxt="n", xaxs="i", yaxs="i",  # without using axes=FALSE because we want exact x/ylim
        ylim = c(-1*ymax, ymax), col = peaks_col, cex = cex, lwd=0.5, frame.plot=FALSE) # max_intensity is 1. give the space of 0.7 for annotation
-  box(lwd=lwd/2)
+  graphics::box(lwd=lwd/2)
 
   # label x/y axis
   label_axis(input_table$max_intensity, xlab="m/z", ylab="Intensity", max_mz, cex, lwd)
@@ -211,14 +212,14 @@ plot_mirror <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_w
   mapply(draw_ms2generalinfo, input_table$`Retention time`, input_table$`Scan number`,
          input_table$`m/z`, input_table$Charge, input_table$`Gene Names`, PSMs, info_height)
   # title outside oma
-  mtext("m/z", side=1, line=0, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
-  mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext("m/z", side=1, line=0, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
   rawFileName = paste("File:", input_table$base_rawFile[1])
-  mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
-  browser()
+  #browser()
 }
 
 
@@ -239,8 +240,8 @@ plot_group <-function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_wid
   max_mz=max(unlist(lapply(mz_intensity_percent, `[[`, 1)))+100 # max mz
 ################################  draw pictures ########################
 
-  graphics.off()
-  pdf(file=paste(outputFilename,"pdf",sep="."), width=pdf_width, height=pdf_height*nrow(input_table))
+  grDevices::graphics.off()
+  grDevices::pdf(file=paste(outputFilename,"pdf",sep="."), width=pdf_width, height=pdf_height*nrow(input_table))
 
   options(scipen=22) # max of fixed (not exponential) notation: 1e22
 
@@ -254,15 +255,15 @@ plot_group <-function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_wid
   mapply(plot_group_individual, mz_intensity_percent, AA_mzs, PSMs, input_table$max_intensity, input_table$base_rawFile, input_table$`Retention time`, input_table$`Scan number`,
          input_table$`m/z`, input_table$Charge, input_table$`Gene Names`,  MoreArgs=list(y_ion_col, b_ion_col, peaks_col, lwd,  peptide_height, mod_height, len_annoSpace, srt, cex, max_mz, info_height, show_letterBY))
   # title outside oma
-  mtext("m/z", side=1, line=1, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
-  mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext("m/z", side=1, line=1, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
   rawFileName = paste("File:", input_table$base_rawFile[1])
-  mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
   # x label
   axis(side = 1, at=seq(0, max_mz, by=200), lwd=0.5*lwd, tck=-0.02, labels=FALSE) # mgp=c(0,0.1,0) setting NOT work for dist. betw. label and x-axis. Thus mtext used.
-  mtext(side = 1, text=seq(0, max_mz, by=200), at=seq(0, max_mz, by=200), cex=0.33*cex) #
+  graphics::mtext(side = 1, text=seq(0, max_mz, by=200), at=seq(0, max_mz, by=200), cex=0.33*cex) #
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
-  browser()
+  #browser()
 }

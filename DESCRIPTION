@@ -18,9 +18,8 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.1)
-Imports: xml2, data.table, DescTools, Rcpp, MSnbase 
+Imports: xml2, data.table, DescTools, Rcpp, MSnbase, scales, Biobase 
 Suggests: knitr, roxygen2, rmarkdown
-LinkingTo: Rcpp
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 BugReports: https://github.com/lileime/mms2plot/issues
