@@ -80,7 +80,7 @@
 #source("R/add_mod_aa.R")
 #source("R/psm_calculation.R")
 #source("R/plot_components.R")
-
+#'
 #' @export
 mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     par_xml_path, #"ext/modifications.xml",
