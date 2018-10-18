@@ -9,18 +9,18 @@
 # semicolon(;) is used in maxquant to separate the labelled aa within the same label types
 readMQPar <- function(mqpar_filename) {
   #browser()
-  xmlread = read_xml(mqpar_filename)
-  filePaths =  xml_find_all(xmlread, "//filePaths") # for files
-  variableModifications = xml_find_all(xmlread, "//variableModifications") # for variable mod
-  isobaricLabels = xml_find_all(xmlread, "//isobaricLabels")  # for reporter ion: e.g. TMT or iTRAQ
-  labelMods = xml_find_all(xmlread, "//labelMods")  # labelling: Arg10;Lys8
-  fixedModifications = xml_find_all(xmlread, "//fixedModifications") # fixed modifications
+  xmlread = xml2::read_xml(mqpar_filename)
+  filePaths =  xml2::xml_find_all(xmlread, "//filePaths") # for files
+  variableModifications = xml2::xml_find_all(xmlread, "//variableModifications") # for variable mod
+  isobaricLabels = xml2::xml_find_all(xmlread, "//isobaricLabels")  # for reporter ion: e.g. TMT or iTRAQ
+  labelMods = xml2::xml_find_all(xmlread, "//labelMods")  # labelling: Arg10;Lys8
+  fixedModifications = xml2::xml_find_all(xmlread, "//fixedModifications") # fixed modifications
 
-  filePaths = basename(xml_text(xml_children(filePaths)))
-  variableModifications = xml_text(xml_children(variableModifications))
-  isobaricLabels = xml_text(xml_children(isobaricLabels))
-  labelMods = xml_text(xml_children(labelMods))
-  fixedModifications = xml_text(xml_children(fixedModifications))
+  filePaths = basename(xml2::xml_text(xml2::xml_children(filePaths)))
+  variableModifications = xml2::xml_text(xml2::xml_children(variableModifications))
+  isobaricLabels = xml2::xml_text(xml2::xml_children(isobaricLabels))
+  labelMods = xml2::xml_text(xml2::xml_children(labelMods))
+  fixedModifications = xml2::xml_text(xml2::xml_children(fixedModifications))
 
   if (all(nchar(filePaths) > 0)) {
     rawfile = paste(filePaths, collapse = ",") # connect multiple input_files by comma
@@ -77,12 +77,13 @@ check_input_table<-function(input_table, id_table_path, mqpar){
   if(length(col_not_exist) > 0 ){ stop(paste("The column(s) '", paste(col_not_exist,collapse = " and ") , "' is(are) not existent! [note:stopped in the function check_input_table].", sep = "" )) }
 
   # check if each label group only contains a single raw file names
+  #browser()
   unique_rawFile = input_table[, unique(input_table$`Raw file`), by = input_table$label]
-  if(nrow(unique_rawFile) != length(unique(unique_rawFile$label))) {stop("MS2 IDs in each group should be derived from the same MS file! [note:stopped in the function check_input_table].")}
+  if(nrow(unique_rawFile) != nrow(unique(unique_rawFile[,1]))) {stop("MS2 IDs in each group should be derived from the same MS file! [note:stopped in the function check_input_table].")}
 
   # check if each label group only contains a single peptide sequences
-  unique_sequence = input_table[, unique(input_table$Sequence), by = input_table$label]
-  if(nrow(unique_sequence) != length(unique(unique_rawFile$label)) ){stop("Each group should contain the same peptide sequences with different modifications! [note:stopped in the function check_input_table].")}
+  #unique_sequence = input_table[, unique(input_table$Sequence), by = input_table$label]
+  #if(nrow(unique_sequence) != length(unique(unique_rawFile$label)) ){stop("Each group should contain the same peptide sequences with different modifications! [note:stopped in the function check_input_table].")}
 
   ##############################################################################################
 
@@ -110,7 +111,7 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, mqp
   # And read site, title, composition and merge into aa_mw_table.
   #browser()
   aa_mw_mod_table=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar) # add mod_aa to the table, labelling data are annotated by group flag
-  #browser()
+  browser()
   scan_number = unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info
 
   print(paste("Reading the raw MS file: ", MS2FileName, "... ..."))
@@ -119,7 +120,7 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, mqp
   mzIntensity_list =  lapply(scan_number, get_ms2info, MS2s_frFile) # call get_ms2info function to extract MS2 M/Z, intensities and etc.
   # Garbage Collection for MS2s_frFile
   rm(MS2s_frFile);  invisible(gc())
-  #browser()
+  browser()
   mzIntensity = do.call(rbind, mzIntensity_list) # change list as data.frame, each row contain one MS2 info
   input_table_sameRawFile = data.table::setDT(mzIntensity)[input_table_sameRawFile, on="Scan number"] # merge input_table and mzIntensity
   #############################################################################################

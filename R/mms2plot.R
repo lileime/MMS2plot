@@ -1,6 +1,7 @@
 #' @author Lei Li
 #' @title mms2plot
 #' @description Visualization of multiple MS/MSs for (un)modified peptides
+#' @export mms2plot
 #' @param id_table_path File path name of a table that contains MS2 information
 #'        of identified (un)modified peptides plus a group labelling. The format
 #'        of MS2 information is referred to as the output file ms2.txt from
@@ -56,22 +57,16 @@
 #library(DescTools)  # MixColor
 
 # load aa_mw and atom_mw files
-#aa_mw_path = "data/AA_MW.txt"
-#atom_mw_path = "data/atom_MW.txt"
-#aa_mw_table <-   data.table::fread(aa_mw_path,   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
-#atom_mw_table <- data.table::fread(atom_mw_path, sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+#aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+#atom_mw_table <- data.table::fread("inst/extdata/atom_MW.txt", sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
 
-#id_table_path = "D:/R_packages/MMS2plot/ext/msms_SILAC.txt"
-#id_table_path = "D:/R_packages/MMS2plot/ext/msms_TMT.txt"
-#id_table_path = "D:/R_packages/MMS2plot/ext/msms_dim.txt"
-#par_xml_path = "D:/R_packages/MMS2plot/ext/modifications.xml"
-#parfile = "ext/mqpar.txt"
-
+#save(aa_mw_table, atom_mw_table, file = "data/data.rda")
+load("data/data.rda")
 #source("R/plot_mirror_or_group.R")
 #source("R/add_mod_aa.R")
 #source("R/psm_calculation.R")
 #source("R/plot_components.R")
-#' @export
+
 mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     par_xml_path, #"ext/modifications.xml",
                     mqpar_filepath,  #
@@ -109,6 +104,14 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
   invisible(gc())
 }
 
-#mqpar_filepath = "mqpar_batch.txt"
-#mm2plot(id_table_path=id_table_path, mqpar_filepath=mqpar_filepath)
+
+#mqpar_filepath = system.file(package = "MMS2plot",dir = "data/mqpar_batch.txt")
+#par_xml_path = system.file(package = "MMS2plot",dir = "data/modifications.xml")
+#id_table_path = system.file(package = "MMS2plot",dir = "data/TMT/msms_TMT.txt")
+#mqpar_filepath = "data/mqpar_batch.txt"
+#par_xml_path = "data/modifications.xml"
+#id_table_path = "data/TMT/msms_TMT.txt"
+#mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath,pdf_width=7)
+
+
 

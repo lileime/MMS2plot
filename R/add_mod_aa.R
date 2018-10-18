@@ -1,6 +1,6 @@
 # add modAA information to aa_mw_table and return aa_mw_mod_table
 add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
-  #browser()
+  browser()
   if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 
   #  Modifications=c("Acetyl (Protein N-term),Phospho (STY)", "Unmodified", "Phospho (STY)", "2 Phospho (STY)", "", NA)
@@ -50,7 +50,7 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
     }
   }
   if(!mqpar$isobaricLabels %in% empty ){ # contains reporter ion, e.g. TMT, iTRAQ; TMT10plex-Nter128,TMT10plex-Nter130,TMT10plex-Lys128,TMT10plex-Lys130
-    #browser()
+    browser()
     Mods = unique(unlist(strsplit(mqpar$isobaricLabels, ",")))
 
     # read parameter.xml and collect isobaricLabels info
@@ -58,14 +58,14 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
     # 1:              Acetyl (K)              Acetylation   C(2) H(2) O     Acetylation 42.010565
     # 2: Acetyl (Protein N-term)              Acetylation   C(2) H(2) O     Acetylation 42.010565
     # 3:     Carbamidomethyl (C) Iodoacetamide derivative C(2) H(3) N O   Iodoacetamide 57.021464
-    xmlread = read_xml(mod_parameter_xml)
-    children = xml_children(xmlread)
-    mod_attrs=xml_attrs(children)
+    xmlread = xml2::read_xml(mod_parameter_xml)
+    children = xml2::xml_children(xmlread)
+    mod_attrs= xml2::xml_attrs(children)
     mod_attrs = lapply(mod_attrs, function(x) data.table::as.data.table(t(x)))
     mod_attrs = data.table::rbindlist(mod_attrs)
     type_fr_description=strsplit(mod_attrs$description, " ")
     mod_attrs$type = unlist(lapply(type_fr_description, function(x) x[1]))
-    mod_attrs$label=xml_text(xml_find_all(children, "type"))
+    mod_attrs$label=xml2::xml_text(xml2::xml_find_all(children, "type"))
     mod_attrs = mod_attrs[,c("title", "description","composition", "type")]
 
     calculate_composition<-function(composition){
@@ -75,10 +75,17 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
 
     mod_attrs$mw = mapply(calculate_composition, mod_attrs$composition)
 
+    browser()
     # extract the infomation of isobaricLabels included in mqpar.xml from parameter.xml
     # if isobaricLabels with same wm are clustered as a single string or separated and stored in a vector, by aggregate and paste
-    isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c(mod_attrs$mw, mod_attrs$type))) # group
-    Mod_list=apply(isolabelType, 1, function(x) subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x["mw"]))<0.01 & mod_attrs$type %in% x["type"])[1] ) # retain unique
+    isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c(mw, type))) # group
+
+    #retain_unique<-funciton(x, mod_attrs){
+    #  subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x["mw"]))<0.01 & mod_attrs$type %in% x["type"])[1]
+    #}
+    #Mod_list=apply(isolabelType, 1, retain_unique, mod_attrs)
+    Mod_list=apply(isolabelType, 1, function(x) subset(mod_attrs, abs(mw - as.numeric(x["mw"]))<0.01 & type %in% x["type"])[1] ) # retain unique
+
     Mods = data.table::rbindlist(Mod_list)
     Mods=stats::aggregate(Mods$title, by=list(Mods$mw), FUN=function(x) paste(x, collapse=";"), simplify=F)$x
 
@@ -101,25 +108,25 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
 
 #extract_mod_xml function
 extract_mod_xml <-function(Mod, xmlurl){
-  xmlread = read_xml(xmlurl)
+  xmlread = xml2::read_xml(xmlurl)
   xpath = paste("//modification[@title='",Mod,"']",sep = "")
-  f1 = xml_find_all(xmlread,xpath)
+  f1 = xml2::xml_find_all(xmlread,xpath)
 
-  mod_pos = xml_text( xml_children(f1)[[1]] ) # position
+  mod_pos = xml2::xml_text( xml2::xml_children(f1)[[1]] ) # position
 
-  b=xml_find_all(f1[[1]] , "//*[name()='position']")
-  cd=unique(xml_text(b))
+  b=xml2::xml_find_all(f1[[1]] , "//*[name()='position']")
+  cd=unique(xml2::xml_text(b))
   #browser()
-  mod_comp = xml_attr(f1,"composition")
+  mod_comp = xml2::xml_attr(f1,"composition")
   mod_comp_split = unlist(strsplit(mod_comp, "\\s"))
   mod_comp_mw = sum(mapply(calculate_atom_mw, mod_comp_split)) # e.g. 15.99
-  mod_abb = xml_attr(f1,"title")
+  mod_abb = xml2::xml_attr(f1,"title")
   mod_abb = substr(mod_abb,1,2)
   mod_abb = tolower(mod_abb)             #e.g. ox
   mod_abb=paste("(",mod_abb,")", sep="") # e.g. "(ox)"
 
-  f2 = xml_find_all(f1,"modification_site")
-  mod_aa = xml_attr(f2,"site")
+  f2 = xml2::xml_find_all(f1,"modification_site")
+  mod_aa = xml2::xml_attr(f2,"site")
   mod_detail = data.table::data.table(cbind(Mod,mod_abb,mod_comp_mw, mod_aa, mod_pos),stringsAsFactors=F)
   return(mod_detail)
 }
