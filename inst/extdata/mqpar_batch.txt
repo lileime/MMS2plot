@@ -1,3 +1,4 @@
-data/silac/mqpar.xml
-data/TMT/mqpar.xml
-data/Dimethyl_Labelling/mqpar.xml
+mqpar_path	ppm
+inst/extdata/silac/mqpar.xml	20
+inst/extdata/TMT/mqpar.xml	300
+inst/extdata/Dimethyl_Labelling/mqpar.xml	20

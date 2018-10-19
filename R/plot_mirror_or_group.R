@@ -1,4 +1,4 @@
-# readMQPar function for individual mqpar.xml files
+# readmqpar_ppm function for individual mqpar.xml files and ppms
 # output:
 #      rawfile                    variableModifications                       isobaricLabels       labelMods
 # 20110715.raw    Acetyl (Protein N-term),Oxidation (M)                                   NA     ,Arg10;Lys8
@@ -7,9 +7,10 @@
 #
 # comma(,) separae filenames, different types of labelling or reporter ion
 # semicolon(;) is used in maxquant to separate the labelled aa within the same label types
-readMQPar <- function(mqpar_filename) {
+readMQPar_ppm <- function(mqpar_filename) {
   #browser()
-  xmlread = xml2::read_xml(mqpar_filename)
+  ppm = mqpar_filename["ppm"]
+  xmlread = xml2::read_xml(mqpar_filename["mqpar_path"])
   filePaths =  xml2::xml_find_all(xmlread, "//filePaths") # for files
   variableModifications = xml2::xml_find_all(xmlread, "//variableModifications") # for variable mod
   isobaricLabels = xml2::xml_find_all(xmlread, "//isobaricLabels")  # for reporter ion: e.g. TMT or iTRAQ
@@ -50,24 +51,26 @@ readMQPar <- function(mqpar_filename) {
       fixedModifications = paste(fixedModifications, collapse = ",")
     }
 
-    output = data.table::data.table(rawfile, variableModifications, isobaricLabels, labelMods, fixedModifications)
+    output = data.table::data.table(rawfile, variableModifications, isobaricLabels, labelMods, fixedModifications, ppm)
     return(output)
   } else{
     stop("No raw file is included in this mqpar.xml!")
   }
+  browser()
   return(NULL)
 }
 
 
 
 # check if the input_table has the expected format
-check_input_table<-function(input_table, id_table_path, mqpar){
-  if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+check_input_table<-function(input_table, id_table_path, mqpar_ppm){
+  #browser()
+
   if(nrow(input_table) == 0){ stop(paste("The file", id_table_path, "is empty! Please see the example file. [note:stopped in the function check_input_table].")) }
-  #print(mqpar)
+  #print(mqpar_ppm)
   #browser()
   unique_rawfiles = tools::file_path_sans_ext(basename(input_table$`Raw file`))
-  parfile = tools::file_path_sans_ext(unlist(strsplit(mqpar$rawfile, ",")))
+  parfile = tools::file_path_sans_ext(unlist(strsplit(mqpar_ppm$rawfile, ",")))
   if(! all(unique_rawfiles %in% parfile)){stop("The mqpar.xml files of Some rawMSfiles are not included by the readPar() function! [note:stopped in the function check_input_table].")}
 
   col_check = c( "Raw file",	"Scan number",	"Sequence",	"Modifications", "Gene Names", "label")
@@ -103,15 +106,15 @@ check_input_table<-function(input_table, id_table_path, mqpar){
 # drawms2plot_samerawfile function
 # get unique MS2 number and read information for each raw file using get_mzIntensity
 # call plot_mms2 for each label type
-drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, mqpar, min_intensity_ratio, pdf_width, pdf_height,
-                                    xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
+drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, output_path, mqpar_ppm, min_intensity_ratio, pdf_width, pdf_height,
+                                    xmai, ymai, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                                     mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   input_table_sameRawFile = input_table[input_table$base_rawFile == basename(MS2FileName)] # extract from input_table MS2 info from the same file
   # Processing modification.xml files
   # And read site, title, composition and merge into aa_mw_table.
   #browser()
-  aa_mw_mod_table=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar) # add mod_aa to the table, labelling data are annotated by group flag
-  browser()
+  list[aa_mw_mod_table, ppm]=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
+  #browser()
   scan_number = unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info
 
   print(paste("Reading the raw MS file: ", MS2FileName, "... ..."))
@@ -150,15 +153,16 @@ get_ms2info <- function(scan_number, ms2_samefile){
 
 
 # plot_mms2 function
-plot_mms2 <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_mms2 <- function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                       xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                       mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
+  browser()
   if(nrow(input_table) == 2){
-    plot_mirror(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+    plot_mirror(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                 xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                 mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   }else{
-    plot_group(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+    plot_group(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   }
@@ -167,10 +171,12 @@ plot_mms2 <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_wid
 
 
 # the main function to draw mirror_plot
-plot_mirror <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_mirror <- function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                         xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                         mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
-  outputFilename = paste(input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "mirror", sep = "_")
+
+  old_wd = set(output_path)
+  outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "mirror", sep = "_")
   #browser()
   mz_intensity_percent = get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
   two_mz_intensity_percent = do.call(rbind, mz_intensity_percent)
@@ -220,17 +226,19 @@ plot_mirror <- function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_w
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
+  setwd(old_wd)
   #browser()
 }
 
 
 
 # group_plot
-plot_group <-function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_group <-function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                       xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                       mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   #browser()
-  outputFilename = paste(input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "group", sep = "_")
+  old_wd = set(output_path)
+  outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "group", sep = "_")
 
   mz_intensity_percent = get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
   AA_mzs = mapply(calculate_aa_mzs,input_table$`Modified sequence`, input_table$Charge, input_table$Monoisotopicmz, MoreArgs=list(ppm, aa_mw_mod_table), SIMPLIFY = F )  # calculate the therotical b/y ions for the given peptides and ppm is considered
@@ -253,8 +261,10 @@ plot_group <-function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_wid
   par(mfrow=c(nplot, 1), oma=c(2,1,1,0), mai=c(0, ymai, 0, ymai), cex=cex, lwd=lwd)
 
   # Curtain layering
-  mapply(plot_group_individual, mz_intensity_percent, AA_mzs, PSMs, input_table$max_intensity, input_table$base_rawFile, input_table$`Retention time`, input_table$`Scan number`,
-         input_table$`m/z`, input_table$Charge, input_table$`Gene Names`,  MoreArgs=list(y_ion_col, b_ion_col, peaks_col, lwd,  peptide_height, mod_height, len_annoSpace, srt, cex, max_mz, info_height, show_letterBY))
+  mapply(plot_group_individual, mz_intensity_percent, AA_mzs, PSMs, input_table$max_intensity,
+         input_table$base_rawFile, input_table$`Retention time`, input_table$`Scan number`,
+         input_table$`m/z`, input_table$Charge, input_table$`Gene Names`,
+         MoreArgs=list(y_ion_col, b_ion_col, peaks_col, ymax, lwd,  peptide_height, mod_height, len_annoSpace, srt, cex, max_mz, info_height, show_letterBY))
   # title outside oma
   graphics::mtext("m/z", side=1, line=1, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
   graphics::mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
@@ -266,5 +276,6 @@ plot_group <-function(input_table, aa_mw_mod_table, min_intensity_ratio, pdf_wid
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
+  setwd(old_wd)
   #browser()
 }

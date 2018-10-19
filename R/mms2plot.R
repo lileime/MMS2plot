@@ -1,6 +1,8 @@
 #' @author Lei Li
 #' @title mms2plot
 #' @description Visualization of multiple MS/MSs for (un)modified peptides
+#' @param aa_mw_table Molecular weight of Amino acids
+#' @param atom_mw_table Molecular weight of atoms
 #' @export mms2plot
 #' @param id_table_path File path name of a table that contains MS2 information
 #'        of identified (un)modified peptides plus a group labelling. The format
@@ -44,6 +46,7 @@
 #'
 #' @return NULL
 #' @import xml2
+#' @import gsubfn
 #' @importFrom MSnbase readMSData
 #' @importFrom grDevices dev.off pdf
 #' @importFrom graphics abline axis lines par plot segments text
@@ -57,19 +60,14 @@
 #library(DescTools)  # MixColor
 
 # load aa_mw and atom_mw files
-#aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
-#atom_mw_table <- data.table::fread("inst/extdata/atom_MW.txt", sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+atom_mw_table <- data.table::fread("inst/extdata/atom_MW.txt", sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
 
-#save(aa_mw_table, atom_mw_table, file = "data/data.rda")
-load("data/data.rda")
-#source("R/plot_mirror_or_group.R")
-#source("R/add_mod_aa.R")
-#source("R/psm_calculation.R")
-#source("R/plot_components.R")
 
 mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     par_xml_path, #"ext/modifications.xml",
                     mqpar_filepath,  #
+                    output_path,
                     min_intensity_ratio=0.01, # mininum peak intensity percentage
                     pdf_width=3.35, # one column  7  # two column
                     pdf_height=pdf_width/2.4,
@@ -87,31 +85,44 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     lwd=1*pdf_width/3.35,
                     cex=1*pdf_width/3.35,
                     show_letterBY=FALSE){
+
   srt = 0
+  if( file.exists(output_path)){stop(paste("The output dictionary [", output_path, "] does NOT exist!"))}
+  #browser()
   # read a batch of mqpar.xml files and extract modifications and label information stored in mqpar
-  mqpar_files=readLines(mqpar_filepath, warn=FALSE)
-  mqpar = data.table::rbindlist(lapply(mqpar_files, readMQPar))
+  mqpar_files=data.table::fread(mqpar_filepath, na.strings = "NA", sep = "\t",
+                                check.names = FALSE, fill = TRUE, header = TRUE, stringsAsFactors = FALSE)
+
+  mqpar_ppm = data.table::rbindlist(apply(mqpar_files, 1, readMQPar_ppm))
 
   input_table <- data.table::fread(id_table_path, na.strings = "NA", sep = "\t",
                                    check.names = FALSE, fill = TRUE, header = TRUE, stringsAsFactors = FALSE)
 
   input_table$base_rawFile = basename(input_table$`Raw file`)
   #browser()
-  input_table = check_input_table(input_table, id_table_path, mqpar)
-
-  lapply(unique(input_table$`Raw file`), drawms2plot_samerawfile, input_table, par_xml_path, mqpar, min_intensity_ratio, pdf_width, pdf_height,
-          xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height, mod_height, len_annoSpace, lwd, cex, show_letterBY, srt) # call for individual raw_files
+  input_table = check_input_table(input_table, id_table_path, mqpar_ppm)
+  #browser()
+  lapply(unique(input_table$`Raw file`), drawms2plot_samerawfile, input_table, par_xml_path, output_path, mqpar_ppm, min_intensity_ratio, pdf_width, pdf_height,
+          xmai, ymai, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height, mod_height, len_annoSpace, lwd, cex, show_letterBY, srt) # call for individual raw_files
   invisible(gc())
 }
 
+#load("data/data.rda")
+PPM_denominator=1E6
 
 #mqpar_filepath = system.file(package = "MMS2plot",dir = "data/mqpar_batch.txt")
 #par_xml_path = system.file(package = "MMS2plot",dir = "data/modifications.xml")
 #id_table_path = system.file(package = "MMS2plot",dir = "data/TMT/msms_TMT.txt")
-#mqpar_filepath = "data/mqpar_batch.txt"
-#par_xml_path = "data/modifications.xml"
-#id_table_path = "data/TMT/msms_TMT.txt"
-#mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath,pdf_width=7)
+#save(aa_mw_table, atom_mw_table, file = "data/data.rda")
+#source("R/plot_mirror_or_group.R")
+#source("R/add_mod_aa.R")
+#source("R/psm_calculation.R")
+#source("R/plot_components.R")
+
+#mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+#par_xml_path = "inst/extdata/modifications.xml"
+#id_table_path = "inst/extdata/TMT/msms_TMT.txt"
+#mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath, output_path="d:", pdf_width=7)
 
 
 

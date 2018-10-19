@@ -1,11 +1,12 @@
 # add modAA information to aa_mw_table and return aa_mw_mod_table
-add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
-  browser()
-  if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar_ppm){
+  #browser()
 
   #  Modifications=c("Acetyl (Protein N-term),Phospho (STY)", "Unmodified", "Phospho (STY)", "2 Phospho (STY)", "", NA)
-  mqpar = subset(mqpar, grepl(tools::file_path_sans_ext(MS2FileName), tools::file_path_sans_ext(mqpar$rawfile)) )
-  if(nrow(mqpar) != 1){stop( paste("The mod/label information of the raw file ", MS2FileName, " extracted from mqpar.xml using the function readMQPar. [note:stopped in the function add_mod_aa].", sep="") )}
+  mqpar = subset(mqpar_ppm, grepl(tools::file_path_sans_ext(MS2FileName), tools::file_path_sans_ext(mqpar_ppm$rawfile)) )
+  if(nrow(mqpar) != 1){stop( paste("The mod/label information of the raw file ", MS2FileName, " extracted from mqpar.xml using the function readmqpar_ppm. [note:stopped in the function add_mod_aa].", sep="") )}
+  ppm = as.numeric(mqpar$ppm)
+
   empty = c("", NA, "NA")
 
   if(!mqpar$fixedModifications %in% empty ) { # contains fixed modifications
@@ -50,7 +51,7 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
     }
   }
   if(!mqpar$isobaricLabels %in% empty ){ # contains reporter ion, e.g. TMT, iTRAQ; TMT10plex-Nter128,TMT10plex-Nter130,TMT10plex-Lys128,TMT10plex-Lys130
-    browser()
+    #browser()
     Mods = unique(unlist(strsplit(mqpar$isobaricLabels, ",")))
 
     # read parameter.xml and collect isobaricLabels info
@@ -75,10 +76,10 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
 
     mod_attrs$mw = mapply(calculate_composition, mod_attrs$composition)
 
-    browser()
+    #browser()
     # extract the infomation of isobaricLabels included in mqpar.xml from parameter.xml
     # if isobaricLabels with same wm are clustered as a single string or separated and stored in a vector, by aggregate and paste
-    isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c(mw, type))) # group
+    isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c("mw", "type"))) # group
 
     #retain_unique<-funciton(x, mod_attrs){
     #  subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x["mw"]))<0.01 & mod_attrs$type %in% x["type"])[1]
@@ -92,7 +93,7 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
     # For each cluster of isobaricLabels, add attach mw into aa_table
     aa_mw_mod_table = lapply(Mods, calculate_aa_wm_label, mod_parameter_xml, aa_mw_mod_table, flag="isobaricLabels")
     aa_mw_mod_table = data.table::rbindlist(aa_mw_mod_table)
-    browser()
+    #browser()
 
   }else if(!mqpar$labelMods %in% empty){ # contains labelMods, e.g. Dimethlys or SILAC
     Mods = unique(unlist(strsplit(mqpar$labelMods, ","))) # mods:Arg10;Lys8
@@ -101,7 +102,7 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar){
     aa_mw_mod_table = data.table::rbindlist(aa_mw_mod_table)
   }
   #browser()
-  return(aa_mw_mod_table)
+  return(list(aa_mw_mod_table, ppm))
 }
 
 

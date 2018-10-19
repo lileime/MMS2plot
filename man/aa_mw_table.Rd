@@ -9,6 +9,10 @@
 aa_mw_table
 }
 \arguments{
+\item{aa_mw_table}{Molecular weight of Amino acids}
+
+\item{atom_mw_table}{Molecular weight of atoms}
+
 \item{id_table_path}{File path name of a table that contains MS2 information
 of identified (un)modified peptides plus a group labelling. The format
 of MS2 information is referred to as the output file ms2.txt from
