@@ -175,7 +175,7 @@ plot_mirror <- function(input_table, output_path, aa_mw_mod_table, min_intensity
                         xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                         mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
 #  browser()
-  outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "mirror", sep = "_")
+  outputFilename = paste(input_table$base_rawFile[1], input_table$label[1], input_table$Sequence[1], "mirror", sep = "_")
   outputFilename = paste(output_path, outputFilename, sep="/")
   outputFilename = paste(outputFilename,"pdf",sep=".")
 
@@ -237,7 +237,7 @@ plot_group <-function(input_table, output_path, aa_mw_mod_table, min_intensity_r
                       xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                       mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   #browser()
-  outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "group", sep = "_")
+  outputFilename = paste(input_table$base_rawFile[1], input_table$label[1], input_table$Sequence[1], "group", sep = "_")
   outputFilename = paste(output_path, outputFilename, sep="/")
   outputFilename = paste(outputFilename,"pdf",sep=".")
   mz_intensity_percent = get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
