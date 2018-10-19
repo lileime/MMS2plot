@@ -123,12 +123,12 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, out
   mzIntensity_list =  lapply(scan_number, get_ms2info, MS2s_frFile) # call get_ms2info function to extract MS2 M/Z, intensities and etc.
   # Garbage Collection for MS2s_frFile
   rm(MS2s_frFile);  invisible(gc())
-  browser()
+  #browser()
   mzIntensity = do.call(rbind, mzIntensity_list) # change list as data.frame, each row contain one MS2 info
   input_table_sameRawFile = data.table::setDT(mzIntensity)[input_table_sameRawFile, on="Scan number"] # merge input_table and mzIntensity
   #############################################################################################
 
-  tmp=by(input_table_sameRawFile, input_table_sameRawFile$label, plot_mms2, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+  tmp=by(input_table_sameRawFile, input_table_sameRawFile$label, plot_mms2, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
          xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
          mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   invisible(gc())
@@ -153,16 +153,16 @@ get_ms2info <- function(scan_number, ms2_samefile){
 
 
 # plot_mms2 function
-plot_mms2 <- function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_mms2 <- function(input_table, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                       xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                       mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
-  browser()
+  #browser()
   if(nrow(input_table) == 2){
-    plot_mirror(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+    plot_mirror(input_table, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                 xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                 mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   }else{
-    plot_group(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+    plot_group(input_table, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   }
@@ -171,13 +171,14 @@ plot_mms2 <- function(output_path, input_table, aa_mw_mod_table, min_intensity_r
 
 
 # the main function to draw mirror_plot
-plot_mirror <- function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_mirror <- function(input_table, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                         xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                         mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
-
-  old_wd = set(output_path)
+#  browser()
   outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "mirror", sep = "_")
-  #browser()
+  outputFilename = paste(output_path, outputFilename, sep="/")
+  outputFilename = paste(outputFilename,"pdf",sep=".")
+
   mz_intensity_percent = get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
   two_mz_intensity_percent = do.call(rbind, mz_intensity_percent)
   AA_mzs = mapply(calculate_aa_mzs,input_table$`Modified sequence`, input_table$Charge, input_table$Monoisotopicmz, MoreArgs=list(ppm, aa_mw_mod_table), SIMPLIFY = F )  # calculate the therotical b/y ions for the given peptides and ppm is considered
@@ -186,7 +187,7 @@ plot_mirror <- function(output_path, input_table, aa_mw_mod_table, min_intensity
   two_PSMs = do.call(rbind, PSMs)
   #browser()
   grDevices::graphics.off()
-  pdf(file=paste(outputFilename, "pdf", sep="."), width=pdf_width, height=pdf_height*2)
+  pdf(file=outputFilename, width=pdf_width, height=pdf_height*2)
 
   old_options <- options(scipen=22) # max of fixed (not exponential) notation: 1e22
   on.exit(options(old_options), add = TRUE)
@@ -226,20 +227,19 @@ plot_mirror <- function(output_path, input_table, aa_mw_mod_table, min_intensity
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
-  setwd(old_wd)
   #browser()
 }
 
 
 
 # group_plot
-plot_group <-function(output_path, input_table, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
+plot_group <-function(input_table, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
                       xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                       mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   #browser()
-  old_wd = set(output_path)
   outputFilename = paste( input_table$label[1], input_table$Sequence[1], "from", input_table$base_rawFile[1], "group", sep = "_")
-
+  outputFilename = paste(output_path, outputFilename, sep="/")
+  outputFilename = paste(outputFilename,"pdf",sep=".")
   mz_intensity_percent = get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
   AA_mzs = mapply(calculate_aa_mzs,input_table$`Modified sequence`, input_table$Charge, input_table$Monoisotopicmz, MoreArgs=list(ppm, aa_mw_mod_table), SIMPLIFY = F )  # calculate the therotical b/y ions for the given peptides and ppm is considered
   #browser()
@@ -250,7 +250,7 @@ plot_group <-function(output_path, input_table, aa_mw_mod_table, min_intensity_r
 ################################  draw pictures ########################
 
   grDevices::graphics.off()
-  grDevices::pdf(file=paste(outputFilename,"pdf",sep="."), width=pdf_width, height=pdf_height*nrow(input_table))
+  grDevices::pdf(file=outputFilename, width=pdf_width, height=pdf_height*nrow(input_table))
 
   options(scipen=22) # max of fixed (not exponential) notation: 1e22
 
@@ -276,6 +276,5 @@ plot_group <-function(output_path, input_table, aa_mw_mod_table, min_intensity_r
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()
-  setwd(old_wd)
   #browser()
 }

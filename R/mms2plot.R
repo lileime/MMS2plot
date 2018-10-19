@@ -58,6 +58,7 @@
 #library(MSnbase)
 #library(data.table)
 #library(DescTools)  # MixColor
+library(gsubfn)
 
 # load aa_mw and atom_mw files
 aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
@@ -110,19 +111,12 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
 #load("data/data.rda")
 PPM_denominator=1E6
 
-#mqpar_filepath = system.file(package = "MMS2plot",dir = "data/mqpar_batch.txt")
-#par_xml_path = system.file(package = "MMS2plot",dir = "data/modifications.xml")
-#id_table_path = system.file(package = "MMS2plot",dir = "data/TMT/msms_TMT.txt")
-#save(aa_mw_table, atom_mw_table, file = "data/data.rda")
-#source("R/plot_mirror_or_group.R")
-#source("R/add_mod_aa.R")
-#source("R/psm_calculation.R")
-#source("R/plot_components.R")
+source("R/plot_mirror_or_group.R")
+source("R/add_mod_aa.R")
+source("R/psm_calculation.R")
+source("R/plot_components.R")
 
-#mqpar_filepath = "inst/extdata/mqpar_batch.txt"
-#par_xml_path = "inst/extdata/modifications.xml"
-#id_table_path = "inst/extdata/TMT/msms_TMT.txt"
-#mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath, output_path="d:", pdf_width=7)
-
-
-
+mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+par_xml_path = "inst/extdata/modifications.xml"
+id_table_path = "inst/extdata/TMT/msms_TMT.txt"
+mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath, output_path="d:", pdf_width=7)
