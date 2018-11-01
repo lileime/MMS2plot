@@ -82,15 +82,16 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar_ppm){
     isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c("mw", "type"))) # group
 
     retain_unique<-function(x, mod_attrs){
-      subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x[5]))<0.01 & mod_attrs$type %in% x[4])[1]  # "5":mw; "4": type
+      #browser()
+      subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x[1]))<0.01 & mod_attrs$type %in% x[2])[1]  # "1":mw; "2": type
     }
-    Mod_list=apply(isolabelType, 1, retain_unique, mod_attrs)
-    #Mod_list=apply(isolabelType, 1, function(x) subset(mod_attrs, abs(mw - as.numeric(x["mw"]))<0.01 & type %in% x["type"])[1] ) # retain unique
+    Mod_list=apply(isolabelType, 1, retain_unique, mod_attrs) # retain unique
 
     Mods = data.table::rbindlist(Mod_list)
     Mods=stats::aggregate(Mods$title, by=list(Mods$mw), FUN=function(x) paste(x, collapse=";"), simplify=F)$x
 
     # For each cluster of isobaricLabels, add attach mw into aa_table
+    #browser()
     aa_mw_mod_table = lapply(Mods, calculate_aa_wm_label, mod_parameter_xml, aa_mw_mod_table, flag="isobaricLabels")
     aa_mw_mod_table = data.table::rbindlist(aa_mw_mod_table)
     #browser()
@@ -102,7 +103,8 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar_ppm){
     aa_mw_mod_table = data.table::rbindlist(aa_mw_mod_table)
   }
   #browser()
-  return(list(aa_mw_mod_table, ppm))
+  output = list(aa_mw_mod_table, ppm)
+  return(output)
 }
 
 

@@ -112,9 +112,12 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, out
   input_table_sameRawFile = input_table[input_table$base_rawFile == basename(MS2FileName)] # extract from input_table MS2 info from the same file
   # Processing modification.xml files
   # And read site, title, composition and merge into aa_mw_table.
-  #browser()
-  list[aa_mw_mod_table, ppm]=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
-  #browser()
+  browser()
+  list_aaMwModTable_ppm=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
+  browser()
+  aa_mw_mod_table = list_aaMwModTable_ppm[[1]]
+  ppm = list_aaMwModTable_ppm[[2]]
+
   scan_number = unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info
 
   print(paste("Reading the raw MS file: ", MS2FileName, "... ..."))
