@@ -28,7 +28,7 @@ calculate_aa_mzs <-function(seq, charge, Monoisotopicmz, ppm, aa_mw_mod_table){
 # for label-free, labelled or reportor ions (e.g. TMT)
 calculate_AAmz_individual_label <-function(aa_mw_mod_table, seq, charge, Monoisotopicmz, ppm, flag){
 
-  if(getRversion() >= "2.15.1")  utils::globalVariables(c(".")) # no visible binding for global variable "Element"
+  ###if(getRversion() >= "2.15.1")  utils::globalVariables(c(".")) # no visible binding for global variable "Element"
 
   H_weight = subset(atom_mw_table, atom_mw_table$Element == "H")$Monoisotopic
   H2O_weight =2* H_weight + subset(atom_mw_table, atom_mw_table$Element == "O")$Monoisotopic
@@ -36,6 +36,7 @@ calculate_AAmz_individual_label <-function(aa_mw_mod_table, seq, charge, Monoiso
   #seq="AAAVLPVLDLAQR"
   #charge = 3
   ms1_mzThreshold = 0.5 # therotical ms1 m/z minus measured ms1 m/z
+  PPM_denominator = 1E6
   mz_range = ppm/PPM_denominator
   #browser()
   ############ using calculateFragments for testing ###############################

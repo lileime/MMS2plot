@@ -19,7 +19,11 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.1)
 Imports: xml2, data.table, DescTools, Rcpp, MSnbase, scales, Biobase, gsubfn 
-Suggests: knitr, roxygen2, rmarkdown
+Suggests: 
+    knitr,
+    roxygen2,
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 BugReports: https://github.com/lileime/mms2plot/issues

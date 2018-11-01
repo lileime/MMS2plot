@@ -81,11 +81,11 @@ add_mod_aa<-function(mod_parameter_xml, MS2FileName, aa_mw_table, mqpar_ppm){
     # if isobaricLabels with same wm are clustered as a single string or separated and stored in a vector, by aggregate and paste
     isolabelType = unique(subset(mod_attrs, mod_attrs$title %in% Mods, select=c("mw", "type"))) # group
 
-    #retain_unique<-funciton(x, mod_attrs){
-    #  subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x["mw"]))<0.01 & mod_attrs$type %in% x["type"])[1]
-    #}
-    #Mod_list=apply(isolabelType, 1, retain_unique, mod_attrs)
-    Mod_list=apply(isolabelType, 1, function(x) subset(mod_attrs, abs(mw - as.numeric(x["mw"]))<0.01 & type %in% x["type"])[1] ) # retain unique
+    retain_unique<-function(x, mod_attrs){
+      subset(mod_attrs, abs(mod_attrs$mw - as.numeric(x[5]))<0.01 & mod_attrs$type %in% x[4])[1]  # "5":mw; "4": type
+    }
+    Mod_list=apply(isolabelType, 1, retain_unique, mod_attrs)
+    #Mod_list=apply(isolabelType, 1, function(x) subset(mod_attrs, abs(mw - as.numeric(x["mw"]))<0.01 & type %in% x["type"])[1] ) # retain unique
 
     Mods = data.table::rbindlist(Mod_list)
     Mods=stats::aggregate(Mods$title, by=list(Mods$mw), FUN=function(x) paste(x, collapse=";"), simplify=F)$x
@@ -135,7 +135,7 @@ extract_mod_xml <-function(Mod, xmlurl){
 # calculate mod_aa at any Terminal
 calculate_aa_wm_anyTerminal<-function(x, aa_mw_mod_table, flag, tmp=NA){
   #browser()
-  if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+  ###if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
   mod_anypos = cbind(data.table::as.data.table(t(x)), aa_mw_mod_table) # merge two data.table by replicating mod_anypos for the nrow of aa_mw_mod_table
   #      Nterm = c("notCterm", "proteinNterm", "anywhere", "anyNterm", "anyCterm")
   mod_anypos_left=data.table::data.table()
@@ -199,6 +199,7 @@ calculate_aa_wm_label <-function(Mod, mod_parameter_xml, aa_mw_mod_table, flag){
 #calculate_atom_mw function for mod mw in extract_mod_xml
 calculate_atom_mw <-function(atom){
   #browser()
+  ###load("data/data.rda")
   if(! grepl('\\(', atom)){ # without brackets
     atom_name = atom
     monoisotopic = atom_mw_table$Monoisotopic[which(atom_mw_table$Element==atom)]

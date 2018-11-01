@@ -1,8 +1,6 @@
 #' @author Lei Li
 #' @title mms2plot
 #' @description Visualization of multiple MS/MSs for (un)modified peptides
-#' @param aa_mw_table Molecular weight of Amino acids
-#' @param atom_mw_table Molecular weight of atoms
 #' @export mms2plot
 #' @param id_table_path File path name of a table that contains MS2 information
 #'        of identified (un)modified peptides plus a group labelling. The format
@@ -14,6 +12,7 @@
 #' @param mqpar_filepath File path name that includes a list of parameter files
 #'        for search engines. The parameter file format is referred to as
 #'        mqpar.xml in Maxquant.
+#' @param output_path path of output files.
 #' @param min_intensity_ratio minimal percentage threshold of MS2 intensity,
 #'        compared with the highest intensity. (default=0.01).
 #' @param pdf_width The width of a single PSM figure area in inches. The area
@@ -103,22 +102,23 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
   invisible(gc())
 }
 
+#rm(list=ls())
 #load("data/data.rda")
-
+#save(aa_mw_table, atom_mw_table, PPM_denominator, file = "data/data.rda")
 # load aa_mw and atom_mw files
-aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
-atom_mw_table <- data.table::fread("inst/extdata/atom_MW.txt", sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
-PPM_denominator=1E6
+#aa_mw_table <-   data.table::fread("inst/extdata/AA_MW.txt",   sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+#atom_mw_table <- data.table::fread("inst/extdata/atom_MW.txt", sep = "\t", check.names = FALSE, fill = TRUE, header = TRUE)
+#PPM_denominator=1E6
 
-source("R/plot_mirror_or_group.R")
-source("R/add_mod_aa.R")
-source("R/psm_calculation.R")
-source("R/plot_components.R")
+#source("R/plot_mirror_or_group.R")
+#source("R/add_mod_aa.R")
+#source("R/psm_calculation.R")
+#source("R/plot_components.R")
 
-mqpar_filepath = "inst/extdata/mqpar_batch.txt"
-par_xml_path = "inst/extdata/modifications.xml"
-id_table_path = "inst/extdata/TMT/msms_TMT.txt"
-id_table_path = "inst/extdata/Dimethyl_Labelling/msms_dim.txt"
-id_table_path = "inst/extdata/silac/msms_SILAC.txt"
+#mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+#par_xml_path = "inst/extdata/modifications.xml"
+#id_table_path = "inst/extdata/TMT/msms_TMT.txt"
+#id_table_path = "inst/extdata/Dimethyl_Labelling/msms_dim.txt"
+#id_table_path = "inst/extdata/silac/msms_SILAC.txt"
 
-mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath, output_path="d:", pdf_width=7)
+#mms2plot(id_table_path=id_table_path, par_xml_path=par_xml_path, mqpar_filepath=mqpar_filepath, output_path="d:", pdf_width=7)
