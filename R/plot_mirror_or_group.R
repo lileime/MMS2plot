@@ -223,10 +223,10 @@ plot_mirror <- function(input_table, output_path, aa_mw_mod_table, min_intensity
   mapply(draw_ms2generalinfo, input_table$`Retention time`, input_table$`Scan number`,
          input_table$`m/z`, input_table$Charge, input_table$`Gene Names`, PSMs, info_height)
   # title outside oma
-  graphics::mtext("m/z", side=1, line=0, cex=0.5*cex, outer=TRUE)  # better than title as mtext can be written to oma (outer margin area)
-  graphics::mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext("m/z", side=1, line=0, cex=0.5*cex, outer=TRUE)
+  graphics::mtext("Intensity", side=2, line=0, cex=0.5*cex, outer=TRUE)
   rawFileName = paste("File:", input_table$base_rawFile[1])
-  graphics::mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE) # better than title as mtext can be written to oma (outer margin area)
+  graphics::mtext(rawFileName, side=3, line=0, cex=0.33*cex, outer=TRUE)
 
   print(paste("The pdf file '", outputFilename, "' was generated.", sep=""))
   dev.off()

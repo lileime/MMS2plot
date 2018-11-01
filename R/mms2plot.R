@@ -82,7 +82,7 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     show_letterBY=FALSE){
 
   srt = 0
-  if( file.exists(output_path)){stop(paste("The output dictionary [", output_path, "] does NOT exist!"))}
+  if(! file.exists(output_path)){stop(paste("The output dictionary [", output_path, "] does NOT exist!"))}
   #browser()
   # read a batch of mqpar.xml files and extract modifications and label information stored in mqpar
   mqpar_files=data.table::fread(mqpar_filepath, na.strings = "NA", sep = "\t",

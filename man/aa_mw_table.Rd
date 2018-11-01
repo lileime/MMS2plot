@@ -9,7 +9,7 @@ amino acid molecular weight table
 }
 \usage{data("aa_mw_table")}
 \format{
-  A data frame with 25 observations on the following 7 variables.
+  A data frame with 25 amino acids on the following 7 variables.
   \describe{
     \item{\code{aa}}{a character vector}
     \item{\code{weight}}{a numeric vector}
