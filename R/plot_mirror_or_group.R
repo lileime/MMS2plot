@@ -106,17 +106,17 @@ check_input_table<-function(input_table, id_table_path, mqpar_ppm){
 # drawms2plot_samerawfile function
 # get unique MS2 number and read information for each raw file using get_mzIntensity
 # call plot_mms2 for each label type
+# aa_mw_mod_table = list_aaMwModTable_ppm[[1]]
+# ppm = list_aaMwModTable_ppm[[2]]
 drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, output_path, mqpar_ppm, min_intensity_ratio, pdf_width, pdf_height,
                                     xmai, ymai, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
                                     mod_height, len_annoSpace, lwd, cex, show_letterBY, srt){
   input_table_sameRawFile = input_table[input_table$base_rawFile == basename(MS2FileName)] # extract from input_table MS2 info from the same file
   # Processing modification.xml files
   # And read site, title, composition and merge into aa_mw_table.
-  browser()
+  #browser()
   list_aaMwModTable_ppm=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
-  browser()
-  aa_mw_mod_table = list_aaMwModTable_ppm[[1]]
-  ppm = list_aaMwModTable_ppm[[2]]
+  # browser()
 
   scan_number = unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info
 
@@ -131,8 +131,8 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, out
   input_table_sameRawFile = data.table::setDT(mzIntensity)[input_table_sameRawFile, on="Scan number"] # merge input_table and mzIntensity
   #############################################################################################
 
-  tmp=by(input_table_sameRawFile, input_table_sameRawFile$label, plot_mms2, output_path, aa_mw_mod_table, min_intensity_ratio, pdf_width, pdf_height,
-         xmai, ymai, ppm, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
+  tmp=by(input_table_sameRawFile, input_table_sameRawFile$label, plot_mms2, output_path, list_aaMwModTable_ppm[[1]], min_intensity_ratio, pdf_width, pdf_height,
+         xmai, ymai, list_aaMwModTable_ppm[[2]], y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height,
          mod_height, len_annoSpace, lwd, cex, show_letterBY, srt)
   invisible(gc())
 }
