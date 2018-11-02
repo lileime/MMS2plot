@@ -204,10 +204,10 @@ calculate_atom_mw <-function(atom){
   ###load("data/data.rda")
   if(! grepl('\\(', atom)){ # without brackets
     atom_name = atom
-    monoisotopic = atom_mw_table$Monoisotopic[which(atom_mw_table$Element==atom)]
+    monoisotopic = mms2plot::atom_mw_table$Monoisotopic[which(mms2plot::atom_mw_table$Element==atom)]
   }else{
     atom_name = gsub('(.+)\\(.*$', '\\1', atom)
-    monoisotopic = atom_mw_table$Monoisotopic[which(atom_mw_table$Element==atom_name)]
+    monoisotopic = mms2plot::atom_mw_table$Monoisotopic[which(mms2plot::atom_mw_table$Element==atom_name)]
     atom_number = as.numeric(gsub('.+\\((.*)\\).*$', '\\1', atom))
     monoisotopic = monoisotopic * atom_number
   }

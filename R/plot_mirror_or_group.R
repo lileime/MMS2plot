@@ -115,7 +115,7 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, out
   # Processing modification.xml files
   # And read site, title, composition and merge into aa_mw_table.
   #browser()
-  list_aaMwModTable_ppm=add_mod_aa(par_xml_path, basename(MS2FileName), aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
+  list_aaMwModTable_ppm=add_mod_aa(par_xml_path, basename(MS2FileName), mms2plot::aa_mw_table, mqpar_ppm) # add mod_aa to the table, labelling data are annotated by group flag
   # browser()
 
   scan_number = unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info

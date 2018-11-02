@@ -2,10 +2,10 @@
 \alias{atom_mw_table}
 \docType{data}
 \title{
-atom_mw_table
+Table of atomic weights
 }
 \description{
-atom molecular weight table
+This data.frame contains 42 atoms with their monoisotpic weights, which are commonly found in proteins.
 }
 \usage{data("atom_mw_table")}
 \format{

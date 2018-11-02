@@ -2,14 +2,14 @@
 \alias{aa_mw_table}
 \docType{data}
 \title{
-aa_mw_table
+Table of amino acids molecular weight
 }
 \description{
-amino acid molecular weight table
+This data.frame contains the table of amino acid residues' molecular weight (mw). This data.frame is used to calculate mw of modified residues. The first two columns are fixed and the rest columns are applied to store modification types. In practice, this table is copied as template and modified accordingly for each plot.
 }
 \usage{data("aa_mw_table")}
 \format{
-  A data frame with 25 amino acids on the following 7 variables.
+  A data frame with 25 observations on the following 7 variables.
   \describe{
     \item{\code{aa}}{a character vector}
     \item{\code{weight}}{a numeric vector}
@@ -21,9 +21,10 @@ amino acid molecular weight table
   }
 }
 
-
+\source{
+http://www.matrixscience.com/help/aa_help.html
+}
 \examples{
 data(aa_mw_table)
-
 }
 \keyword{datasets}
