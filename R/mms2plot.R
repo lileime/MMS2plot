@@ -59,7 +59,7 @@
 #library(DescTools)  # MixColor
 #library(gsubfn)
 
-mms2plot <-function(id_table_path, #="ext/msms_test.txt",
+mms2plot <-function(id_table_path, #"ext/msms_test.txt",
                     par_xml_path, #"ext/modifications.xml",
                     mqpar_filepath,  #
                     output_path,
@@ -81,21 +81,21 @@ mms2plot <-function(id_table_path, #="ext/msms_test.txt",
                     cex=1*pdf_width/3.35,
                     show_letterBY=FALSE){
 
-  srt = 0
+  srt <- 0
   if(! file.exists(output_path)){stop(paste("The output dictionary [", output_path, "] does NOT exist!"))}
   #browser()
   # read a batch of mqpar.xml files and extract modifications and label information stored in mqpar
-  mqpar_files=data.table::fread(mqpar_filepath, na.strings = "NA", sep = "\t",
+  mqpar_files<-data.table::fread(mqpar_filepath, na.strings = "NA", sep = "\t",
                                 check.names = FALSE, fill = TRUE, header = TRUE, stringsAsFactors = FALSE)
 
-  mqpar_ppm = data.table::rbindlist(apply(mqpar_files, 1, readMQPar_ppm))
+  mqpar_ppm <- data.table::rbindlist(apply(mqpar_files, 1, readMQPar_ppm))
 
   input_table <- data.table::fread(id_table_path, na.strings = "NA", sep = "\t",
                                    check.names = FALSE, fill = TRUE, header = TRUE, stringsAsFactors = FALSE)
 
-  input_table$base_rawFile = basename(input_table$`Raw file`)
+  input_table$base_rawFile <- basename(input_table$`Raw file`)
   #browser()
-  input_table = check_input_table(input_table, id_table_path, mqpar_ppm)
+  input_table <- check_input_table(input_table, id_table_path, mqpar_ppm)
   #browser()
   lapply(unique(input_table$`Raw file`), drawms2plot_samerawfile, input_table, par_xml_path, output_path, mqpar_ppm, min_intensity_ratio, pdf_width, pdf_height,
           xmai, ymai, y_ion_col, b_ion_col, peaks_col, ymax, peptide_height, info_height, mod_height, len_annoSpace, lwd, cex, show_letterBY, srt) # call for individual raw_files
