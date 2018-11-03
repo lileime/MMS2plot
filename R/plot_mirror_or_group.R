@@ -56,7 +56,7 @@ readMQPar_ppm <- function(mqpar_filename) {
   } else{
     stop("No raw file is included in this mqpar.xml!")
   }
-  browser()
+  #browser()
   return(NULL)
 }
 
@@ -73,7 +73,8 @@ check_input_table<-function(input_table, id_table_path, mqpar_ppm){
   parfile <- tools::file_path_sans_ext(unlist(strsplit(mqpar_ppm$rawfile, ",")))
   if(! all(unique_rawfiles %in% parfile)){stop("The mqpar.xml files of Some rawMSfiles are not included by the readPar() function! [note:stopped in the function check_input_table].")}
 
-  col_check <- c( "Raw file",	"Scan number",	"Sequence",	"Modifications", "Gene Names", "label")
+  col_check <-
+    c("Raw file","Scan number","Sequence","Modifications","Gene Names","label")
 
   # check if specific columns exist in the input_table
   col_not_exist <- col_check[!col_check %in% colnames(input_table)]
@@ -121,7 +122,7 @@ drawms2plot_samerawfile <- function(MS2FileName, input_table,  par_xml_path, out
   scan_number <- unique(input_table_sameRawFile$`Scan number`) # unique MS2 scan_number from the extract MS2 info
 
   print(paste("Reading the raw MS file: ", MS2FileName, "... ..."))
-  MS2s_frFile <- MSnbase::readMSData(MS2FileName, msLevel=2, mode="onDisk", verbose=F) # read MS2 info from raw file
+  MS2s_frFile <- MSnbase::readMSData(MS2FileName, msLevel=2, mode="onDisk", verbose=FALSE) # read MS2 info from raw file
   print("Reading ... ... completed!")
   mzIntensity_list <-  lapply(scan_number, get_ms2info, MS2s_frFile) # call get_ms2info function to extract MS2 M/Z, intensities and etc.
   # Garbage Collection for MS2s_frFile
@@ -184,9 +185,9 @@ plot_mirror <- function(input_table, output_path, aa_mw_mod_table, min_intensity
 
   mz_intensity_percent <- get_intensity_perc(input_table, min_intensity_ratio) # set intensity value range between 0 to 1
   two_mz_intensity_percent <- do.call(rbind, mz_intensity_percent)
-  AA_mzs <- mapply(calculate_aa_mzs,input_table$`Modified sequence`, input_table$Charge, input_table$Monoisotopicmz, MoreArgs=list(ppm, aa_mw_mod_table), SIMPLIFY = F )  # calculate the therotical b/y ions for the given peptides and ppm is considered
+  AA_mzs <- mapply(calculate_aa_mzs,input_table$`Modified sequence`, input_table$Charge, input_table$Monoisotopicmz, MoreArgs=list(ppm, aa_mw_mod_table), SIMPLIFY = FALSE )  # calculate the therotical b/y ions for the given peptides and ppm is considered
   #browser()
-  PSMs <- mapply(find_matchedIons, AA_mzs, mz_intensity_percent, MoreArgs=list(b_ion_col, y_ion_col), SIMPLIFY = F )  # calcualte PSM for each MS2 plot iteratively
+  PSMs <- mapply(find_matchedIons, AA_mzs, mz_intensity_percent, MoreArgs=list(b_ion_col, y_ion_col), SIMPLIFY = FALSE )  # calcualte PSM for each MS2 plot iteratively
   two_PSMs <- do.call(rbind, PSMs)
   #browser()
   grDevices::graphics.off()

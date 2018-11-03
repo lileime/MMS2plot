@@ -43,7 +43,7 @@
 #' @param show_letterBY Logical: should "b"/"y" characters are shown on the peak
 #'        annotation? The default is FALSE.
 #'
-#' @return NULL
+#' @return No value is returned.
 #' @import xml2
 #' @import gsubfn
 #' @importFrom MSnbase readMSData

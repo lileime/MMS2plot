@@ -75,6 +75,9 @@ symbols is magnified relative to the default. (default=pdf_width/3.35).}
 \item{show_letterBY}{Logical: should "b"/"y" characters are shown on the peak
 annotation? The default is FALSE.}
 }
+\value{
+No value is returned.
+}
 \description{
 Visualization of multiple MS/MSs for (un)modified peptides
 }
