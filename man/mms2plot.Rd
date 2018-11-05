@@ -20,8 +20,7 @@ of MS2 information is referred to as the output file ms2.txt from
 the Maxquant search software.}
 
 \item{par_xml_path}{Xml file path of parameters for modifications and
-labelling. The file format is referred to as modifications.xml in
-Maxquant.}
+labelling. The file is the Maxquant parameter file modifications.xml.}
 
 \item{mqpar_filepath}{File path name that includes a list of parameter files
 for search engines. The parameter file format is referred to as
@@ -65,21 +64,51 @@ region, relative to the default. (default=1.3)}
 \item{mod_height}{The height of modification annotation relative to the
 location where peptide sequence is annotation. (default=0.07).}
 
-\item{len_annoSpace}{The length of b/y ion annotation segments. (default=0.1).}
+\item{len_annoSpace}{The length of b/y ion annotation segments.(default=0.1).}
 
 \item{lwd}{line width relative to the default. (default=pdf_width/3.35).}
 
 \item{cex}{A numerical value giving the amount by which plotting text and
-symbols is magnified relative to the default. (default=pdf_width/3.35).}
+symbols is magnified relative to the default.(default=pdf_width/3.35).}
 
-\item{show_letterBY}{Logical: should "b"/"y" characters are shown on the peak
-annotation? The default is FALSE.}
+\item{show_letterBY}{Logical: should "b" or "y" characters are shown on the
+peak annotation? The default is FALSE.}
 }
 \value{
 No value is returned.
 }
 \description{
 Visualization of multiple MS/MSs for (un)modified peptides
+}
+\note{
+See vignettes for more details
+}
+\examples{
+# Generate mms2plot for TMT labelling
+# id_table_path expands the Maxqaunt output msms.txt by adding "label" column
+id_table_path = "inst/extdata/TMT/msms_TMT.txt"
+par_xml_path = "inst/extdata/modifications.xml" # Maxquant modifications.xml
+# mqpar_filepath contains mqpar.xml with full file path and PPM cutoff
+mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+output_path = "inst/extdata"
+mms2plot(id_table_path, par_xml_path, mqpar_filepath, output_path)
+
+# Generate mms2plot for SILAC labelling
+id_table_path = "inst/extdata/silac/msms_SILAC.txt"
+par_xml_path = "inst/extdata/modifications.xml"
+mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+output_path = "inst/extdata"
+mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,
+          pdf_width=7 )
+
+# Generate mms2plot for dimethyl labelling
+id_table_path = "inst/extdata/Dimethyl_Labelling/msms_dim.txt"
+par_xml_path = "inst/extdata/modifications.xml"
+mqpar_filepath = "inst/extdata/mqpar_batch.txt"
+output_path = "inst/extdata"
+mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,
+          show_letterBY=TRUE )
+
 }
 \author{
 Lei Li
