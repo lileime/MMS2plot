@@ -159,3 +159,5 @@ mms2plot <-function(id_table_path,
 
 #library(BiocCheck)
 #BiocCheck::BiocCheck("e:/r_packages/mms2plot")
+#BiocCheck::BiocCheck("e:/test/mms2plot")
+
