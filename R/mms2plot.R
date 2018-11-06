@@ -73,7 +73,7 @@
 #' par_xml_path = "inst/extdata/modifications.xml"
 #' mqpar_filepath = "inst/extdata/mqpar_batch.txt"
 #' output_path = "inst/extdata"
-#' mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,show_letterBY=TRUE )
+#' mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path )
 #' }
 #rm(list=ls())
 #.libPaths( c( .libPaths(), "D:/Rpackages_tmp") )

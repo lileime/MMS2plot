@@ -5,13 +5,13 @@
 \title{mms2plot}
 \usage{
 mms2plot(id_table_path, par_xml_path, mqpar_filepath, output_path,
-  min_intensity_ratio = 0.01, pdf_width = 3.35,
-  pdf_height = pdf_width/2.4, xmai = 0.15 * pdf_width/3.35,
-  ymai = 0.3 * pdf_width/3.35, ppm = 20, y_ion_col = "red",
-  b_ion_col = "blue", peaks_col = "grey", ymax = 1.6,
-  info_height = 1.5, peptide_height = 1.3, mod_height = 0.07,
-  len_annoSpace = 0.1, lwd = 1 * pdf_width/3.35, cex = 1 *
-  pdf_width/3.35, show_letterBY = FALSE)
+    min_intensity_ratio = 0.01, pdf_width = 3.35,
+    pdf_height = pdf_width/2.4, xmai = 0.15 * pdf_width/3.35,
+    ymai = 0.3 * pdf_width/3.35, ppm = 20, y_ion_col = "red",
+    b_ion_col = "blue", peaks_col = "grey", ymax = 1.6,
+    info_height = 1.5, peptide_height = 1.3, mod_height = 0.07,
+    len_annoSpace = 0.1, lwd = 1 * pdf_width/3.35, cex = 1 *
+    pdf_width/3.35, show_letterBY = FALSE)
 }
 \arguments{
 \item{id_table_path}{File path name of a table that contains MS2 information
@@ -106,7 +106,7 @@ id_table_path = "inst/extdata/Dimethyl_Labelling/msms_dim.txt"
 par_xml_path = "inst/extdata/modifications.xml"
 mqpar_filepath = "inst/extdata/mqpar_batch.txt"
 output_path = "inst/extdata"
-mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,show_letterBY=TRUE )
+mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path )
 }
 }
 \author{
