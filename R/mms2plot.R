@@ -51,6 +51,7 @@
 #' @importFrom data.table fread
 #' @note See vignettes for more details
 #' @examples
+#' \dontrun{
 #' # Generate mms2plot for TMT labelling
 #' # id_table_path expands the Maxqaunt output msms.txt by adding "label" column
 #' id_table_path = "inst/extdata/TMT/msms_TMT.txt"
@@ -65,17 +66,15 @@
 #' par_xml_path = "inst/extdata/modifications.xml"
 #' mqpar_filepath = "inst/extdata/mqpar_batch.txt"
 #' output_path = "inst/extdata"
-#' mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,
-#'           pdf_width=7 )
+#' mms2plot(id_table_path,par_xml_path,mqpar_filepath,output_path,pdf_width=7)
 #'
 #' # Generate mms2plot for dimethyl labelling
 #' id_table_path = "inst/extdata/Dimethyl_Labelling/msms_dim.txt"
 #' par_xml_path = "inst/extdata/modifications.xml"
 #' mqpar_filepath = "inst/extdata/mqpar_batch.txt"
 #' output_path = "inst/extdata"
-#' mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path, \
-#'           show_letterBY=TRUE )
-#'
+#' mms2plot( id_table_path, par_xml_path, mqpar_filepath, output_path,show_letterBY=TRUE )
+#' }
 #rm(list=ls())
 #.libPaths( c( .libPaths(), "D:/Rpackages_tmp") )
 #library(xml2)
